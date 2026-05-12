@@ -1,0 +1,408 @@
+:root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #666666;
+    --border: #e5e5e5;
+    --code-bg: #1e1e1e;
+    --code-text: #00ff00;
+    --link: #0066cc;
+    --link-hover: #0052a3;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    color: var(--link);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+.header {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+}
+
+.nav-brand a {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.nav-toggle span {
+    width: 22px;
+    height: 2px;
+    background: var(--text);
+    transition: all 0.3s;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+}
+
+.nav-menu a {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    padding: 8px 0;
+    position: relative;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active {
+    color: var(--text);
+}
+
+.nav-menu a.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--text);
+}
+
+.main {
+    flex: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 48px 20px;
+    width: 100%;
+}
+
+.hero {
+    text-align: center;
+    padding: 40px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+}
+
+.hero h1 {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 24px;
+}
+
+.intro {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.8;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text);
+}
+
+.article-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.article-card {
+    display: block;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.article-card:hover {
+    border-color: var(--text);
+    transform: translateY(-2px);
+}
+
+.article-date {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.article-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 8px 0 12px;
+    color: var(--text);
+}
+
+.article-card:hover .article-title {
+    color: var(--link);
+}
+
+.article-summary {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    line-height: 1.7;
+}
+
+.read-more {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+}
+
+.article-card:hover .read-more {
+    color: var(--link);
+}
+
+.footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.post-content {
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+.post-content h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 32px 0 16px;
+}
+
+.post-content h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--text);
+}
+
+.post-content h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 32px 0 12px;
+}
+
+.post-content p {
+    margin-bottom: 16px;
+    color: var(--text);
+}
+
+.post-content ul,
+.post-content ol {
+    margin: 16px 0 20px 24px;
+}
+
+.post-content li {
+    margin-bottom: 8px;
+}
+
+.post-content strong {
+    font-weight: 600;
+}
+
+.post-content code {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    background: #f5f5f5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #d63384;
+}
+
+.post-content pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 20px 0;
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.post-content pre code {
+    background: none;
+    padding: 0;
+    color: var(--code-text);
+    font-size: inherit;
+}
+
+.directory-tree {
+    background: var(--code-bg);
+    color: #e0e0e0;
+    padding: 20px 24px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 0.9rem;
+    line-height: 1.8;
+}
+
+.directory-tree .folder {
+    color: #6cb6ff;
+}
+
+.directory-tree .file {
+    color: #a5d6ff;
+}
+
+.step {
+    background: #f8f9fa;
+    border-left: 3px solid var(--text);
+    padding: 20px 24px;
+    margin: 24px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.step-number {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.step-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.tip {
+    background: #e7f5ff;
+    border-left: 3px solid #0066cc;
+    padding: 16px 20px;
+    margin: 24px 0;
+    border-radius: 0 8px 8px 0;
+    color: #004a80;
+}
+
+.encouragement {
+    text-align: center;
+    padding: 32px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    margin-top: 40px;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .nav-toggle {
+        display: flex;
+    }
+
+    .nav-menu {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 20px;
+        gap: 0;
+        display: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-menu li {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .nav-menu li:last-child {
+        border-bottom: none;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero {
+        padding: 32px 0 40px;
+    }
+
+    .main {
+        padding: 32px 16px;
+    }
+
+    .article-card {
+        padding: 20px;
+    }
+
+    .post-content pre {
+        margin: 20px -16px;
+        border-radius: 0;
+    }
+
+    .step {
+        margin: 20px -16px;
+        border-radius: 0;
+        padding: 16px 20px;
+    }
+
+    .encouragement {
+        margin: 32px -16px;
+        border-radius: 0;
+        padding: 24px 20px;
+    }
+}

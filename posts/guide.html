@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本博客使用教程 - CodeLog</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-brand">
+                <a href="../index.html">&lt;CodeLog/&gt;</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="菜单">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="guide.html" class="active">教程</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main">
+        <article class="post-content">
+            <h1>本博客使用教程</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 32px;">
+                手把手教你发布新博客文章 | 最后更新：2026-05-12
+            </p>
+
+            <p>欢迎使用 CodeLog！这是一个纯静态博客，无需服务器、数据库，所有文件都在本地，修改即可更新。本教程将详细讲解如何在这个博客上添加和管理你的文章。</p>
+
+            <h2>一、博客目录结构</h2>
+            <p>这是一个标准的多文件静态博客结构：</p>
+
+            <div class="directory-tree">
+<span class="folder">blog/</span>
+├── <span class="file">index.html</span>     ← 首页
+├── <span class="folder">css/</span>
+│   └── <span class="file">style.css</span>   ← 全局样式
+├── <span class="folder">js/</span>
+│   └── <span class="file">main.js</span>     ← 交互逻辑
+└── <span class="folder">posts/</span>
+    └── <span class="file">guide.html</span>   ← 教程文章
+            </div>
+
+            <p><strong>每个文件的作用：</strong></p>
+            <ul>
+                <li><code>index.html</code> - 网站首页，展示博客入口</li>
+                <li><code>css/style.css</code> - 控制所有页面的样式</li>
+                <li><code>js/main.js</code> - 控制导航栏等交互功能</li>
+                <li><code>posts/*.html</code> - 你的文章页面，放在 posts 文件夹</li>
+            </ul>
+
+            <h2>二、新增文章步骤</h2>
+
+            <div class="step">
+                <div class="step-number">第一步</div>
+                <div class="step-title">创建文章文件</div>
+                <p>在 <code>posts/</code> 文件夹中创建一个新的 HTML 文件，文件名建议使用英文，如 <code>my-first-post.html</code>。</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">第二步</div>
+                <div class="step-title">复制模板</div>
+                <p>复制下面的文章模板到你的新文件中：</p>
+                <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="zh-CN"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;你的文章标题&lt;/title&gt;
+    &lt;link rel="stylesheet" href="../css/style.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header class="header"&gt;
+        &lt;nav class="nav"&gt;
+            &lt;div class="nav-brand"&gt;
+                &lt;a href="../index.html"&gt;&lt;CodeLog/&gt;&lt;/a&gt;
+            &lt;/div&gt;
+            &lt;button class="nav-toggle" id="navToggle" aria-label="菜单"&gt;
+                &lt;span&gt;&lt;/span&gt;
+                &lt;span&gt;&lt;/span&gt;
+                &lt;span&gt;&lt;/span&gt;
+            &lt;/button&gt;
+            &lt;ul class="nav-menu" id="navMenu"&gt;
+                &lt;li&gt;&lt;a href="../index.html"&gt;首页&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href="guide.html"&gt;教程&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main class="main"&gt;
+        &lt;article class="post-content"&gt;
+            &lt;!-- 在这里写你的文章内容 --&gt;
+        &lt;/article&gt;
+    &lt;/main&gt;
+
+    &lt;script src="../js/main.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </div>
+
+            <div class="step">
+                <div class="step-number">第三步</div>
+                <div class="step-title">修改文章内容</div>
+                <p>在 <code>&lt;main&gt;</code> 标签内编写你的文章。使用以下格式：</p>
+                <pre><code>&lt;h1&gt;文章大标题&lt;/h1&gt;
+&lt;p&gt;段落文字...&lt;/p&gt;
+&lt;h2&gt;二级标题&lt;/h2&gt;
+&lt;ul&gt;
+    &lt;li&gt;列表项 1&lt;/li&gt;
+    &lt;li&gt;列表项 2&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code&gt;代码块内容&lt;/code&gt;&lt;/pre&gt;</code></pre>
+            </div>
+
+            <div class="step">
+                <div class="step-number">第四步</div>
+                <div class="step-title">添加文章链接</div>
+                <p>打开 <code>index.html</code>，在文章列表中添加你的文章链接：</p>
+                <pre><code>&lt;a href="posts/my-first-post.html" class="article-card"&gt;
+    &lt;span class="article-date"&gt;2026-05-13&lt;/span&gt;
+    &lt;h3 class="article-title"&gt;我的第一篇文章&lt;/h3&gt;
+    &lt;p class="article-summary"&gt;文章摘要...&lt;/p&gt;
+    &lt;span class="read-more"&gt;阅读全文 →&lt;/span&gt;
+&lt;/a&gt;</code></pre>
+            </div>
+
+            <h2>三、修改内容方法</h2>
+
+            <h3>修改博客名称</h3>
+            <p>打开 <code>index.html</code>，找到 <code>&lt;h1&gt;CodeLog&lt;/h1&gt;</code> 和 <code>&lt;p class="subtitle"&gt;...&lt;/p&gt;</code>，修改为你的内容。</p>
+
+            <h3>修改个人简介</h3>
+            <p>在 <code>index.html</code> 中找到 <code>&lt;p class="intro"&gt;...&lt;/p&gt;</code>，修改里面的文字。</p>
+
+            <h3>修改样式</h3>
+            <p>打开 <code>css/style.css</code>，修改顶部的 CSS 变量：</p>
+            <pre><code>:root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #666666;
+    --border: #e5e5e5;
+    --code-bg: #1e1e1e;
+    --code-text: #00ff00;
+    --link: #0066cc;
+    --link-hover: #0052a3;
+}</code></pre>
+
+            <h3>添加代码块</h3>
+            <p>使用 <code>&lt;pre&gt;&lt;code&gt;</code> 标签包裹代码，会自动显示为深色终端风格：</p>
+            <pre><code>&lt;pre&gt;&lt;code&gt;
+const greeting = "Hello World";
+console.log(greeting);
+&lt;/code&gt;&lt;/pre&gt;</code></pre>
+
+            <h3>添加提示框</h3>
+            <p>使用 <code>.tip</code> 类添加提示框：</p>
+            <pre><code>&lt;div class="tip"&gt;
+    💡 提示：记得保存文件后再刷新浏览器！
+&lt;/div&gt;</code></pre>
+
+            <h2>四、手机查看方式</h2>
+
+            <h3>方法一：本地预览</h3>
+            <p>将博客文件夹通过微信、QQ、AirDrop 等方式传到手机，然后用手机浏览器打开 <code>index.html</code> 文件即可。</p>
+
+            <h3>方法二：局域网预览</h3>
+            <p>在电脑上启动一个简单的 HTTP 服务器（需要 Python）：</p>
+            <pre><code># Windows
+python -m http.server 8080
+
+# Mac/Linux
+python3 -m http.server 8080</code></pre>
+            <p>然后确保手机和电脑在同一 WiFi 网络下，用手机浏览器访问 <code>电脑IP地址:8080</code>。</p>
+
+            <div class="tip">
+                💡 <strong>查找电脑 IP 地址：</strong><br>
+                Windows: 打开CMD，输入 <code>ipconfig</code><br>
+                Mac: 打开终端，输入 <code>ifconfig | grep inet</code>
+            </div>
+
+            <h3>方法三：部署到 GitHub Pages</h3>
+            <ol>
+                <li>在 GitHub 创建一个新仓库</li>
+                <li>把博客所有文件上传到仓库</li>
+                <li>进入仓库 Settings → Pages</li>
+                <li>Source 选择 <code>main</code> 分支</li>
+                <li>等待部署完成，访问 <code>你的用户名.github.io/仓库名</code></li>
+            </ol>
+
+            <h2>五、常用 HTML 标签速查</h2>
+
+            <pre><code>&lt;h1&gt; ~ &lt;h6&gt;    标题（h1最大，h6最小）
+&lt;p&gt;            段落
+&lt;ul&gt; / &lt;li&gt;    无序列表
+&lt;ol&gt; / &lt;li&gt;    有序列表
+&lt;strong&gt;       粗体
+&lt;em&gt;           斜体
+&lt;code&gt;         行内代码
+&lt;pre&gt;&lt;code&gt;     代码块
+&lt;a href=""&gt;    链接
+&lt;div&gt;          区块容器
+&lt;span&gt;         行内容器</code></pre>
+
+            <h2>六、文件路径说明</h2>
+            <p>所有路径都使用相对路径，确保本地可以直接打开：</p>
+            <ul>
+                <li>从 <code>posts/</code> 引用 <code>css/</code>: <code>../css/style.css</code></li>
+                <li>从 <code>posts/</code> 引用 <code>js/</code>: <code>../js/main.js</code></li>
+                <li>从 <code>posts/</code> 链接到首页: <code>../index.html</code></li>
+            </ul>
+
+            <div class="tip">
+                ⚠️ <strong>注意：</strong>一定要使用 <code>../</code> 返回上级目录，因为 <code>posts/</code> 比 <code>css/</code> 低一级。
+            </div>
+
+            <div class="encouragement">
+                🚀 好了，开始写你的第一篇文章吧！<br>
+                有问题欢迎交流！
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>CodeLog © 2026 | 用纯静态 HTML 搭建</p>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>
