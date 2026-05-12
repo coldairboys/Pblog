@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeLog - 程序员博客</title>
+    <style>
+        :root {
+            --color-primary: #000000;
+            --color-bg: #ffffff;
+            --color-gray-dark: #333333;
+            --color-gray: #666666;
+            --color-gray-light: #cccccc;
+            --color-code-bg: #1e1e1e;
+            --color-code-text: #00ff00;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            --font-mono: "SF Mono", "Fira Code", "Consolas", monospace;
+            --spacing-unit: 1rem;
+            --max-width: 800px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            color: var(--color-primary);
+            background-color: var(--color-bg);
+            font-size: 16px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-gray-light);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .nav-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-family: var(--font-mono);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: var(--color-gray);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+            padding: 0.5rem 0;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--color-primary);
+        }
+
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .nav-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--color-primary);
+            transition: all 0.3s;
+        }
+
+        main {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 80px var(--spacing-unit) 2rem;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-family: var(--font-mono);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--color-gray-dark);
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            color: var(--color-gray);
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--color-gray-light);
+        }
+
+        .article-list {
+            list-style: none;
+        }
+
+        .article-item {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--color-gray-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .article-item:hover {
+            padding-left: 1rem;
+        }
+
+        .article-item:last-child {
+            border-bottom: none;
+        }
+
+        .article-meta {
+            font-size: 0.875rem;
+            color: var(--color-gray);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-mono);
+        }
+
+        .article-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+        }
+
+        .article-title:hover {
+            color: var(--color-gray-dark);
+        }
+
+        .article-summary {
+            color: var(--color-gray);
+            font-size: 0.95rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--color-gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            cursor: pointer;
+        }
+
+        .back-link:hover {
+            color: var(--color-primary);
+        }
+
+        .article-content {
+            line-height: 1.8;
+        }
+
+        .article-content h2 {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .article-content h3 {
+            margin-top: 2rem;
+        }
+
+        .article-content ul,
+        .article-content ol {
+            margin: 1rem 0 1.5rem 1.5rem;
+            color: var(--color-gray-dark);
+        }
+
+        .article-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .article-content p {
+            margin-bottom: 1rem;
+        }
+
+        .article-content .step {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f9f9f9;
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .article-content .step-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            background: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--color-code-bg);
+            color: var(--color-code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--color-code-text);
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: #f5f5f5;
+            color: var(--color-gray-dark);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-family: var(--font-mono);
+            border: 1px solid var(--color-gray-light);
+        }
+
+        .about-section {
+            padding: 2rem 0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            font-family: var(--font-mono);
+        }
+
+        .encouragement {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: flex;
+            }
+
+            .nav-menu {
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                background: var(--color-bg);
+                border-bottom: 1px solid var(--color-gray-light);
+                padding: 1rem;
+                gap: 0;
+                display: none;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .nav-menu li {
+                padding: 0.75rem 0;
+                border-bottom: 1px solid var(--color-gray-light);
+            }
+
+            .nav-menu li:last-child {
+                border-bottom: none;
+            }
+
+            .nav-menu a {
+                display: block;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .article-title {
+                font-size: 1.1rem;
+            }
+
+            pre {
+                padding: 1rem;
+                font-size: 0.85rem;
+                margin: 1rem -1rem;
+                border-radius: 0;
+            }
+
+            .article-content .step {
+                margin: 1.5rem -1rem;
+                padding: 1rem;
+                border-radius: 0;
+            }
+
+            .encouragement {
+                margin: 2rem -1rem;
+                border-radius: 0;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="#/" class="nav-brand">CodeLog</a>
+            <button class="nav-toggle" onclick="toggleMenu()" aria-label="菜单">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#/" id="nav-home">首页</a></li>
+                <li><a href="#/articles" id="nav-articles">文章列表</a></li>
+                <li><a href="#/about" id="nav-about">关于我</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main id="app"></main>
+
+    <script>
+        const articles = [
+            {
+                id: 1,
+                title: '如何在这个静态博客里发布第一篇文章',
+                date: '2026-05-12',
+                summary: '这是一份手把手教程，教你如何修改 HTML 文件，在这个博客里添加、编辑和发布新文章。',
+                content: `
+                    <p>欢迎来到 CodeLog！这是一个纯静态 HTML 博客，不需要服务器、数据库，所有内容都集成在一个 <code>index.html</code> 文件里。修改即更新，简单高效。</p>
+
+                    <h2>1. 博客简介</h2>
+                    <p>这个博客最大的特点就是<strong>极简</strong>和<strong>零依赖</strong>：</p>
+                    <ul>
+                        <li>所有代码都在一个 HTML 文件中</li>
+                        <li>无需安装任何软件，打开浏览器即可使用</li>
+                        <li>修改 HTML 文件后刷新页面就能看到更新</li>
+                        <li>部署极其简单，可以上传到 GitHub Pages、Netlify 或任何静态托管服务</li>
+                    </ul>
+
+                    <h2>2. 准备工作</h2>
+                    <p>在开始之前，你只需要准备：</p>
+                    <ul>
+                        <li>一个文本编辑器（手机备忘录、电脑的 VSCode、Sublime Text、Notepad++ 都可以）</li>
+                        <li>一个现代浏览器（Chrome、Firefox、Safari、Edge 都可以）</li>
+                    </ul>
+
+                    <div class="step">
+                        <div class="step-title">第一步：复制文章模板</div>
+                        <p>打开 <code>index.html</code> 文件，找到「文章列表」部分（在 JavaScript 的 <code>articles</code> 数组中），复制任意一篇现有文章的完整代码块。</p>
+                        <pre><code>{
+    id: 2,
+    title: '你的新文章标题',
+    date: '2026-05-12',
+    summary: '你的文章摘要...',
+    content: '你的文章内容...'
+}</code></pre>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-title">第二步：修改文章信息</div>
+                        <p>将复制的内容粘贴到数组中，修改以下字段：</p>
+                        <ul>
+                            <li><code>id</code>：设置为比现有文章更大的数字（必须是唯一的）</li>
+                            <li><code>title</code>：你的文章标题</li>
+                            <li><code>date</code>：发布日期，格式为 YYYY-MM-DD</li>
+                            <li><code>summary</code>：简短摘要，会显示在文章列表中</li>
+                        </ul>
+                        <pre><code>{
+    id: 2,
+    title: '我的第一篇博客文章',
+    date: '2026-05-13',
+    summary: '这是我写的第一篇文章...',
+    content: '...'
+}</code></pre>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-title">第三步：添加文章内容</div>
+                        <p>在 <code>content</code> 字段中添加你的文章正文。使用 HTML 标签来格式化内容：</p>
+                        <pre><code>content: \`
+            &lt;h2&gt;标题&lt;/h2&gt;
+            &lt;p&gt;段落文字...&lt;/p&gt;
+            &lt;h3&gt;子标题&lt;/h3&gt;
+            &lt;ul&gt;
+                &lt;li&gt;列表项 1&lt;/li&gt;
+                &lt;li&gt;列表项 2&lt;/li&gt;
+            &lt;/ul&gt;
+            &lt;pre&gt;&lt;code&gt;代码块内容&lt;/code&gt;&lt;/pre&gt;
+            &lt;p&gt;继续写...&lt;/p&gt;
+        \`</code></pre>
+                        <p><strong>常用 HTML 标签说明：</strong></p>
+                        <ul>
+                            <li><code>&lt;h2&gt;</code> - 二级标题</li>
+                            <li><code>&lt;h3&gt;</code> - 三级标题</li>
+                            <li><code>&lt;p&gt;</code> - 段落</li>
+                            <li><code>&lt;ul&gt;</code> / <code>&lt;li&gt;</code> - 无序列表</li>
+                            <li><code>&lt;ol&gt;</code> / <code>&lt;li&gt;</code> - 有序列表</li>
+                            <li><code>&lt;pre&gt;&lt;code&gt;</code> - 代码块（会显示为深色背景）</li>
+                            <li><code>&lt;strong&gt;</code> - 粗体文字</li>
+                            <li><code>&lt;em&gt;</code> - 斜体文字</li>
+                            <li><code>&lt;code&gt;</code> - 行内代码</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-title">第四步：保存并查看</div>
+                        <p>保存修改后的 <code>index.html</code> 文件，然后用浏览器打开它。你的新文章应该已经出现在首页和文章列表中了！</p>
+                        <p>如果文章没有显示，请检查：</p>
+                        <ul>
+                            <li>JavaScript 语法是否正确（注意逗号、引号是否匹配）</li>
+                            <li>HTML 标签是否正确闭合</li>
+                            <li>控制台是否有错误信息（按 F12 打开开发者工具）</li>
+                        </ul>
+                    </div>
+
+                    <h2>5. 进阶玩法</h2>
+
+                    <h3>5.1 修改导航栏</h3>
+                    <p>在 HTML 中找到 <code>&lt;nav&gt;</code> 部分，可以修改博客标题和导航链接：</p>
+                    <pre><code>&lt;a href="#/" class="nav-brand"&gt;你的博客名&lt;/a&gt;</code></pre>
+
+                    <h3>5.2 修改个人介绍</h3>
+                    <p>在 <code>renderAbout()</code> 函数中修改「关于我」页面的内容。</p>
+
+                    <h3>5.3 发布到 GitHub Pages</h3>
+                    <p>将 <code>index.html</code> 上传到 GitHub 仓库，然后在仓库 Settings → Pages 中选择 <code>main</code> 分支，你的博客就会自动发布到 <code>https://你的用户名.github.io/仓库名</code>。</p>
+
+                    <h3>5.4 自定义样式</h3>
+                    <p>在 <code>&lt;style&gt;</code> 标签中可以修改：</p>
+                    <ul>
+                        <li><code>--color-primary</code>：主色调（默认为黑色）</li>
+                        <li><code>--color-code-bg</code>：代码块背景色</li>
+                        <li><code>--color-code-text</code>：代码文字颜色</li>
+                    </ul>
+                    <pre><code>:root {
+    --color-primary: #0066cc;
+    --color-code-bg: #282c34;
+    --color-code-text: #abb2bf;
+}</code></pre>
+
+                    <div class="encouragement">
+                        🚀 快去写下你的第一篇博客吧！
+                    </div>
+                `
+            }
+        ];
+
+        function init() {
+            window.addEventListener('hashchange', router);
+            router();
+        }
+
+        function router() {
+            const hash = window.location.hash || '#/';
+            const app = document.getElementById('app');
+            
+            updateNavigation(hash);
+
+            if (hash === '#/' || hash === '') {
+                renderHome(app);
+            } else if (hash === '#/articles') {
+                renderArticles(app);
+            } else if (hash.startsWith('#/article/')) {
+                const id = parseInt(hash.split('/')[2]);
+                renderArticle(app, id);
+            } else if (hash === '#/about') {
+                renderAbout(app);
+            }
+
+            app.classList.add('fade-in');
+            setTimeout(() => app.classList.remove('fade-in'), 300);
+        }
+
+        function updateNavigation(hash) {
+            document.querySelectorAll('.nav-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            if (hash === '#/' || hash === '') {
+                document.getElementById('nav-home').classList.add('active');
+            } else if (hash === '#/articles' || hash.startsWith('#/article/')) {
+                document.getElementById('nav-articles').classList.add('active');
+            } else if (hash === '#/about') {
+                document.getElementById('nav-about').classList.add('active');
+            }
+        }
+
+        function renderHome(container) {
+            const latestArticles = articles.slice(0, 3);
+            
+            container.innerHTML = `
+                <h1>CodeLog</h1>
+                <p class="intro">
+                    90 后全栈工程师，热爱技术，擅长从 0 到 1 构建产品。<br>
+                    在这里分享编程心得、项目经验和技术思考。
+                </p>
+
+                <h2>最新文章</h2>
+                <ul class="article-list">
+                    ${latestArticles.map(article => `
+                        <li class="article-item" onclick="window.location.hash='#/article/${article.id}'">
+                            <div class="article-meta">${article.date}</div>
+                            <div class="article-title">${article.title}</div>
+                            <div class="article-summary">${article.summary}</div>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+
+        function renderArticles(container) {
+            container.innerHTML = `
+                <h1>文章列表</h1>
+                <p class="intro">共 ${articles.length} 篇文章</p>
+                <ul class="article-list">
+                    ${articles.map(article => `
+                        <li class="article-item" onclick="window.location.hash='#/article/${article.id}'">
+                            <div class="article-meta">${article.date}</div>
+                            <div class="article-title">${article.title}</div>
+                            <div class="article-summary">${article.summary}</div>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+
+        function renderArticle(container, id) {
+            const article = articles.find(a => a.id === id);
+            
+            if (!article) {
+                container.innerHTML = `
+                    <a class="back-link" onclick="window.history.back()">← 返回</a>
+                    <h1>文章不存在</h1>
+                    <p>抱歉，您访问的文章不存在。</p>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <a class="back-link" onclick="window.location.hash='#/articles'">← 返回文章列表</a>
+                <article>
+                    <h1>${article.title}</h1>
+                    <div class="article-meta" style="margin-bottom: 2rem;">${article.date}</div>
+                    <div class="article-content">
+                        ${article.content}
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderAbout(container) {
+            container.innerHTML = `
+                <h1>关于我</h1>
+                
+                <div class="about-section">
+                    <div class="section-title">个人简介</div>
+                    <p>
+                        你好！我是 CodeLog 的作者。<br><br>
+                        一名热爱编程的全栈工程师，喜欢折腾各种新技术。
+                        从前端到后端，从移动端到桌面端，都有所涉猎。<br><br>
+                        写代码是我最大的爱好，也是我的工作。我坚信好的代码应该简洁、优雅、易于维护。
+                        这个博客就是我的技术笔记和生活记录，希望能对你有所帮助。
+                    </p>
+                </div>
+
+                <div class="about-section">
+                    <div class="section-title">技术栈</div>
+                    <div class="tag-list">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag">TypeScript</span>
+                        <span class="tag">React</span>
+                        <span class="tag">Vue</span>
+                        <span class="tag">Node.js</span>
+                        <span class="tag">Python</span>
+                        <span class="tag">Go</span>
+                        <span class="tag">PostgreSQL</span>
+                        <span class="tag">MongoDB</span>
+                        <span class="tag">Docker</span>
+                        <span class="tag">Kubernetes</span>
+                        <span class="tag">AWS</span>
+                        <span class="tag">Git</span>
+                        <span class="tag">Linux</span>
+                    </div>
+                </div>
+
+                <div class="about-section">
+                    <div class="section-title">联系方式</div>
+                    <p>
+                        如果你有任何问题、建议或合作意向，欢迎通过以下方式联系我：<br><br>
+                        <strong>Email:</strong> hello@codelog.dev<br>
+                        <strong>GitHub:</strong> github.com/codelog
+                    </p>
+                </div>
+            `;
+        }
+
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
