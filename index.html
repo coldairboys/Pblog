@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,14 +12,19 @@
             <div class="nav-brand">
                 <a href="index.html">&lt;CodeLog/&gt;</a>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="菜单">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+                    <span class="theme-icon dark-icon">☀</span>
+                    <span class="theme-icon light-icon">☾</span>
+                </button>
+                <button class="nav-toggle" id="navToggle" aria-label="菜单">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
             <ul class="nav-menu" id="navMenu">
                 <li><a href="index.html" class="active">首页</a></li>
-                <li><a href="posts/guide.html">教程</a></li>
             </ul>
         </nav>
     </header>
@@ -29,28 +34,21 @@
             <h1>CodeLog</h1>
             <p class="subtitle">记录代码，分享思考</p>
             <p class="intro">
-                90后全栈工程师，热爱技术，擅长从0到1构建产品。<br>
-                在这里分享编程心得、项目经验和技术思考。
+                纯静态 Markdown 博客，默认深色模式。<br>
+                极简、干净、专注内容。
             </p>
         </section>
 
         <section class="articles">
-            <h2 class="section-title">最新文章</h2>
-            <div class="article-list">
-                <a href="posts/guide.html" class="article-card">
-                    <span class="article-date">2026-05-12</span>
-                    <h3 class="article-title">本博客使用教程——手把手教你发布新博客文章</h3>
-                    <p class="article-summary">
-                        详细讲解博客目录结构、新增文章步骤、修改内容方法，以及如何用手机查看和管理你的博客。
-                    </p>
-                    <span class="read-more">阅读全文 →</span>
-                </a>
+            <h2 class="section-title">文章列表</h2>
+            <div class="article-list" id="articleList">
+                <div class="loading">加载中...</div>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <p>CodeLog © 2026 | 用纯静态 HTML 搭建</p>
+        <p>CodeLog © 2026 | 纯静态 Markdown 博客</p>
     </footer>
 
     <script src="js/main.js"></script>
