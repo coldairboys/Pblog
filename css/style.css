@@ -1,33 +1,41 @@
 :root {
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #242424;
-    --bg-code: #0d0d0d;
-    --text-primary: #e0e0e0;
-    --text-secondary: #a0a0a0;
-    --border: #333333;
-    --link: #6cb6ff;
-    --link-hover: #99d1ff;
-    --code-text: #00ff00;
-    --code-inline-bg: #2a2a2a;
-    --code-inline-text: #ff79c6;
-    --shadow: rgba(0, 0, 0, 0.3);
-    --gradient: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #2a2a2a;
+    --bg-code: #282c34;
+    --text-primary: #c9d1d9;
+    --text-secondary: #8b949e;
+    --border: #3d3d3d;
+    --link: #58a6ff;
+    --link-hover: #79c0ff;
+    --code-text: #e6edf3;
+    --code-keyword: #ff7b72;
+    --code-string: #a5d6ff;
+    --code-number: #79c0ff;
+    --code-comment: #8b949e;
+    --code-inline-bg: #3d3d3d;
+    --code-inline-text: #f0f6fc;
+    --shadow: rgba(0, 0, 0, 0.35);
+    --gradient: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
 }
 
 [data-theme="light"] {
     --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
+    --bg-secondary: #f6f8fa;
     --bg-code: #f6f8fa;
-    --text-primary: #1a1a1a;
-    --text-secondary: #666666;
-    --border: #e1e4e8;
-    --link: #0066cc;
-    --link-hover: #0052a3;
-    --code-text: #22863a;
-    --code-inline-bg: #f0f0f0;
-    --code-inline-text: #d63384;
+    --text-primary: #1f2328;
+    --text-secondary: #656d76;
+    --border: #d0d7de;
+    --link: #0969da;
+    --link-hover: #0a58ca;
+    --code-text: #24292f;
+    --code-keyword: #cf222e;
+    --code-string: #0a3069;
+    --code-number: #0550ae;
+    --code-comment: #6e7781;
+    --code-inline-bg: #e6e8eb;
+    --code-inline-text: #d73a49;
     --shadow: rgba(0, 0, 0, 0.1);
-    --gradient: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    --gradient: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
 }
 
 * {
@@ -379,13 +387,14 @@ a:hover {
 .post-content pre {
     background: var(--bg-code);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 24px;
     overflow-x: auto;
-    margin: 20px 0;
+    margin: 24px 0;
     font-family: "SF Mono", "Fira Code", Consolas, monospace;
     font-size: 0.9rem;
-    line-height: 1.6;
+    line-height: 1.7;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .post-content pre code {
@@ -418,34 +427,22 @@ a:hover {
 .directory-tree {
     background: var(--bg-code);
     border: 1px solid var(--border);
-    color: #e0e0e0;
+    color: var(--code-text);
     padding: 20px 24px;
-    border-radius: 8px;
-    margin: 20px 0;
+    border-radius: 10px;
+    margin: 24px 0;
     font-family: "SF Mono", "Fira Code", Consolas, monospace;
     font-size: 0.9rem;
     line-height: 1.8;
     overflow-x: auto;
 }
 
-[data-theme="light"] .directory-tree {
-    color: #24292e;
-}
-
 .directory-tree .folder {
-    color: #6cb6ff;
+    color: var(--code-string);
 }
 
 .directory-tree .file {
-    color: #a5d6ff;
-}
-
-[data-theme="light"] .directory-tree .folder {
-    color: #0066cc;
-}
-
-[data-theme="light"] .directory-tree .file {
-    color: #0052a3;
+    color: var(--code-number);
 }
 
 .step-box {
