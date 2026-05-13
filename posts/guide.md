@@ -97,11 +97,10 @@ posts/2026-05-13-my-first-post.md
 
 要在文章中展示代码块语法，使用四个反引号包裹：
 
-```markdown
+
 ```javascript
 const greeting = "Hello World";
 console.log(greeting);
-```
 ```
 
 渲染效果：
