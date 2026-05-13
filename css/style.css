@@ -403,6 +403,33 @@ a:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     white-space: pre-wrap;
     word-break: break-word;
+    position: relative;
+}
+
+.post-content pre .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.post-content pre .copy-btn:hover {
+    background: var(--border);
+    color: var(--text-primary);
+}
+
+.post-content pre .copy-btn.copied {
+    background: var(--link);
+    color: white;
+    border-color: var(--link);
 }
 
 .post-content pre code {

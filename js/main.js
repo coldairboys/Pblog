@@ -102,6 +102,9 @@
                     </article>
                 </div>
             `;
+
+            // 为代码块添加复制按钮功能
+            addCopyButtons();
         } catch (error) {
             main.innerHTML = `
                 <div class="post-page">
@@ -147,6 +150,30 @@
             .replace(/'/g, '&#039;');
     }
 
+    function addCopyButtons() {
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const pre = this.parentElement;
+                const code = pre.querySelector('code');
+                const text = code.textContent;
+
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = '已复制!';
+                    this.classList.add('copied');
+
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                });
+            });
+        });
+    }
+
     function parseMarkdown(md) {
         let html = md;
 
@@ -175,7 +202,7 @@
                 placeholder: placeholder,
                 code: escapeHtml(code)
             });
-            return `<pre><code>${placeholder}</code></pre>`;
+            return `<pre><button class="copy-btn">复制</button><code>${placeholder}</code></pre>`;
         });
 
         html = html
