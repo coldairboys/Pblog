@@ -516,6 +516,33 @@ a:hover {
     color: #f0b429;
 }
 
+.post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 0.95rem;
+}
+
+.post-content table th,
+.post-content table td {
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.post-content table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+}
+
+.post-content table tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .post-content table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.05);
+}
+
 .encouragement {
     text-align: center;
     padding: 32px;

@@ -174,6 +174,36 @@
         });
     }
 
+    function parseTable(tableText) {
+        const lines = tableText.trim().split('\n').filter(line => line.trim());
+        if (lines.length < 2) return tableText;
+
+        let html = '<table>';
+
+        // 表头
+        const headerRow = lines[0].split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+        html += '<thead><tr>';
+        headerRow.forEach(cell => {
+            html += `<th>${cell}</th>`;
+        });
+        html += '</tr></thead>';
+
+        // 数据行
+        html += '<tbody>';
+        for (let i = 2; i < lines.length; i++) {
+            const row = lines[i].split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+            html += '<tr>';
+            row.forEach(cell => {
+                html += `<td>${cell}</td>`;
+            });
+            html += '</tr>';
+        }
+        html += '</tbody>';
+
+        html += '</table>';
+        return html;
+    }
+
     function parseMarkdown(md) {
         let html = md;
 
@@ -205,6 +235,17 @@
             return `<pre><button class="copy-btn">复制</button><code>${placeholder}</code></pre>`;
         });
 
+        // 先处理表格
+        const tableBlocks = [];
+        html = html.replace(/(\|.*\|\n\|[-:| ]*\|\n(?:\|.*\|\n?)*)/g, function(match) {
+            const placeholder = `__TABLE_BLOCK_${tableBlocks.length}__`;
+            tableBlocks.push({
+                placeholder: placeholder,
+                table: parseTable(match)
+            });
+            return placeholder;
+        });
+
         html = html
             .replace(/`([^`]+)`/g, '<code>$1</code>')
             .replace(/^### (.+)$/gm, '<h3>$1</h3>')
@@ -220,6 +261,11 @@
             .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
             .replace(/^\s*\n/gm, '')
             .replace(/\n{3,}/g, '\n\n');
+
+        // 替换回表格
+        tableBlocks.forEach(item => {
+            html = html.replace(item.placeholder, item.table);
+        });
 
         codeBlocks.forEach(item => {
             html = html.replace(item.placeholder, item.code);
