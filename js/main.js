@@ -102,6 +102,12 @@
                     </article>
                 </div>
             `;
+
+            addCopyButtons();
+
+            if (window.Prism) {
+                Prism.highlightAll();
+            }
         } catch (error) {
             main.innerHTML = `
                 <div class="post-page">
@@ -147,6 +153,58 @@
             .replace(/'/g, '&#039;');
     }
 
+    function addCopyButtons() {
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const pre = this.parentElement;
+                const code = pre.querySelector('code');
+                const text = code.textContent;
+
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = '已复制!';
+                    this.classList.add('copied');
+
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                });
+            });
+        });
+    }
+
+    function parseTable(tableText) {
+        const lines = tableText.trim().split('\n').filter(line => line.trim());
+        if (lines.length < 2) return tableText;
+
+        let html = '<table>';
+
+        const headerRow = lines[0].split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+        html += '<thead><tr>';
+        headerRow.forEach(cell => {
+            html += `<th>${cell}</th>`;
+        });
+        html += '</tr></thead>';
+
+        html += '<tbody>';
+        for (let i = 2; i < lines.length; i++) {
+            const row = lines[i].split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+            html += '<tr>';
+            row.forEach(cell => {
+                html += `<td>${cell}</td>`;
+            });
+            html += '</tr>';
+        }
+        html += '</tbody>';
+
+        html += '</table>';
+        return html;
+    }
+
     function parseMarkdown(md) {
         let html = md;
 
@@ -168,14 +226,35 @@
             html = lines.slice(contentStart).join('\n');
         }
 
+        const tableBlocks = [];
+        html = html.replace(/(\|.*\|\n\|[-:| ]*\|\n(?:\|.*\|\n?)*)/g, function(match) {
+            const placeholder = `__TABLE_BLOCK_${tableBlocks.length}__`;
+            tableBlocks.push({
+                placeholder: placeholder,
+                table: parseTable(match)
+            });
+            return placeholder;
+        });
+
         const codeBlocks = [];
-        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+        html = html.replace(/````(\w*)\n([\s\S]*?)````/g, function(match, lang, code) {
             const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+            const languageClass = lang ? ` language-${lang}` : '';
             codeBlocks.push({
                 placeholder: placeholder,
                 code: escapeHtml(code)
             });
-            return `<pre><code>${placeholder}</code></pre>`;
+            return `<pre><button class="copy-btn">复制</button><code class="${languageClass}">${placeholder}</code></pre>`;
+        });
+
+        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+            const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+            const languageClass = lang ? ` language-${lang}` : '';
+            codeBlocks.push({
+                placeholder: placeholder,
+                code: escapeHtml(code)
+            });
+            return `<pre><button class="copy-btn">复制</button><code class="${languageClass}">${placeholder}</code></pre>`;
         });
 
         html = html
@@ -194,6 +273,10 @@
             .replace(/^\s*\n/gm, '')
             .replace(/\n{3,}/g, '\n\n');
 
+        tableBlocks.forEach(item => {
+            html = html.replace(item.placeholder, item.table);
+        });
+
         codeBlocks.forEach(item => {
             html = html.replace(item.placeholder, item.code);
         });
@@ -203,7 +286,8 @@
             p = p.trim();
             if (!p) return '';
             if (p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<ol') ||
-                p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr')) {
+                p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr') ||
+                p.startsWith('<table')) {
                 return p;
             }
             return `<p>${p.replace(/\n/g, '<br>')}</p>`;
@@ -219,6 +303,8 @@
         html = html.replace(/<p>(<blockquote>)/g, '$1');
         html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
         html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<table>)/g, '$1');
+        html = html.replace(/(<\/table>)<\/p>/g, '$1');
 
         return html;
     }
