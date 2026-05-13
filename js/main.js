@@ -159,9 +159,21 @@
             html = lines.slice(contentStart).join('\n');
         }
 
-        html = html.replace(/````(\w*)\n([\s\S]*?)````/g, '<pre><code>$2</code></pre>');
-        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+        const codeBlocks = [];
+        let codeBlockIndex = 0;
+
+        html = html.replace(/````(\w*)\n([\s\S]*?)````/g, function(match, lang, content) {
+            codeBlocks.push({ lang: lang || 'text', content: content });
+            return `[[CODE_BLOCK_${codeBlockIndex++}]]`;
+        });
+
+        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, content) {
+            codeBlocks.push({ lang: lang || 'text', content: content });
+            return `[[CODE_BLOCK_${codeBlockIndex++}]]`;
+        });
+
         html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+        html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
         html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
         html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
         html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
@@ -207,7 +219,7 @@
                 }
 
                 if (line.startsWith('> ')) {
-                    result.push(`<blockquote>${line.substring(2)}</blockquote>`);
+                    result.push(`<blockquote><p>${line.substring(2)}</p></blockquote>`);
                 } else if (line.trim() !== '') {
                     result.push(line);
                 }
@@ -225,15 +237,16 @@
             p = p.trim();
             if (!p) return '';
             if (p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<ol') ||
-                p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr')) {
+                p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr') ||
+                p.startsWith('[[CODE_BLOCK_')) {
                 return p;
             }
             return `<p>${p.replace(/\n/g, ' ')}</p>`;
         }).join('\n\n');
 
         html = html.replace(/<p><\/p>/g, '');
-        html = html.replace(/<p>(<h[1-3]>)/g, '$1');
-        html = html.replace(/(<\/h[1-3]>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+        html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ul>)/g, '$1');
         html = html.replace(/(<\/ul>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ol>)/g, '$1');
@@ -244,7 +257,22 @@
         html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
         html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
 
+        html = html.replace(/\[\[CODE_BLOCK_(\d+)\]\]/g, function(match, index) {
+            const block = codeBlocks[parseInt(index)];
+            if (block) {
+                const escapedContent = escapeHtml(block.content);
+                return `<pre class="language-${block.lang}"><code>${escapedContent}</code></pre>`;
+            }
+            return match;
+        });
+
         return html;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     window.addEventListener('hashchange', handleRoute);
