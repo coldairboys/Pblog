@@ -237,31 +237,35 @@
         });
 
         const codeBlocks = [];
+        
+        // 1. 先处理四反引号的代码块（避免里面的三反引号被当作真正的代码块）
         html = html.replace(/````(\w*)\n([\s\S]*?)````/g, function(match, lang, code) {
             const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
-            const languageClass = lang ? ` language-${lang}` : '';
             codeBlocks.push({
                 placeholder: placeholder,
-                code: escapeHtml(code)
+                code: escapeHtml(code),
+                lang: lang || ''
             });
-            return `<pre><button class="copy-btn">复制</button><code class="${languageClass}">${placeholder}</code></pre>`;
+            return placeholder;
         });
 
+        // 2. 再处理三反引号的代码块
         html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
             const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
-            const languageClass = lang ? ` language-${lang}` : '';
             codeBlocks.push({
                 placeholder: placeholder,
-                code: escapeHtml(code)
+                code: escapeHtml(code),
+                lang: lang || ''
             });
-            return `<pre><button class="copy-btn">复制</button><code class="${languageClass}">${placeholder}</code></pre>`;
+            return placeholder;
         });
 
+        // 3. 处理其他 Markdown 标记
         html = html
             .replace(/`([^`]+)`/g, '<code>$1</code>')
             .replace(/^### (.+)$/gm, '<h3>$1</h3>')
             .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h3>')
             .replace(/^\> (.+)$/gm, '<blockquote>$1</blockquote>')
             .replace(/^\- (.+)$/gm, '<li>$1</li>')
             .replace(/(<li>.*<\/li>)\n(<li>)/g, '$1$2')
@@ -273,26 +277,32 @@
             .replace(/^\s*\n/gm, '')
             .replace(/\n{3,}/g, '\n\n');
 
-        tableBlocks.forEach(item => {
-            html = html.replace(item.placeholder, item.table);
-        });
-
-        codeBlocks.forEach(item => {
-            html = html.replace(item.placeholder, item.code);
-        });
-
+        // 4. 处理段落
         const paragraphs = html.split('\n\n');
         html = paragraphs.map(p => {
             p = p.trim();
             if (!p) return '';
             if (p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<ol') ||
-                p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr') ||
-                p.startsWith('<table')) {
+                p.startsWith('__CODE_BLOCK_') || p.startsWith('<blockquote') || p.startsWith('<hr') ||
+                p.startsWith('__TABLE_BLOCK_')) {
                 return p;
             }
             return `<p>${p.replace(/\n/g, '<br>')}</p>`;
         }).join('\n');
 
+        // 5. 替换表格占位符
+        tableBlocks.forEach(item => {
+            html = html.replace(item.placeholder, item.table);
+        });
+
+        // 6. 替换代码块占位符为实际的 HTML（此时才包裹 pre/code 标签）
+        codeBlocks.forEach(item => {
+            const langClass = item.lang ? ` language-${item.lang}` : '';
+            const htmlBlock = `<pre><button class="copy-btn">复制</button><code${langClass}>${item.code}</code></pre>`;
+            html = html.replace(item.placeholder, htmlBlock);
+        });
+
+        // 7. 清理多余的 p 标签
         html = html.replace(/<p><\/p>/g, '');
         html = html.replace(/<p>(<h[1-3]>)/g, '$1');
         html = html.replace(/(<\/h[1-3]>)<\/p>/g, '$1');
