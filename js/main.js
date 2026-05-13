@@ -138,6 +138,15 @@
         return meta;
     }
 
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function parseMarkdown(md) {
         let html = md;
 
@@ -145,7 +154,7 @@
         let contentStart = 0;
         const lines = html.split('\n');
 
-        for (let i = 0; i < Math.min(10, lines.length); i++) {
+        for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (line.startsWith('---') || line.startsWith('# ') || line.startsWith('**日期:') || line.startsWith('**发布日期:')) {
                 metaLines.push(i);
@@ -159,68 +168,37 @@
             html = lines.slice(contentStart).join('\n');
         }
 
-        html = html.replace(/````(\w*)\n([\s\S]*?)````/g, '<pre><code>$2</code></pre>');
-        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
-        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-        html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-        html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-        html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-        html = html.replace(/^---$/gm, '<hr>');
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+        const codeBlocks = [];
+        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+            const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+            codeBlocks.push({
+                placeholder: placeholder,
+                code: escapeHtml(code)
+            });
+            return `<pre><code>${placeholder}</code></pre>`;
+        });
 
-        const htmlLines = html.split('\n');
-        const result = [];
-        let inList = false;
-        let listType = null;
+        html = html
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/^\> (.+)$/gm, '<blockquote>$1</blockquote>')
+            .replace(/^\- (.+)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)\n(<li>)/g, '$1$2')
+            .replace(/(<li>[\s\S]*?)(?=\n(?!<li>)|$)/g, '<ul>$1</ul>')
+            .replace(/<\/ul>\n<ul>/g, '')
+            .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+            .replace(/^---$/gm, '<hr>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+            .replace(/^\s*\n/gm, '')
+            .replace(/\n{3,}/g, '\n\n');
 
-        for (let i = 0; i < htmlLines.length; i++) {
-            let line = htmlLines[i];
+        codeBlocks.forEach(item => {
+            html = html.replace(item.placeholder, item.code);
+        });
 
-            const unorderedMatch = line.match(/^(\s*)[-\*\+] (.+)$/);
-            const orderedMatch = line.match(/^(\s*)(\d+)\. (.+)$/);
-
-            if (unorderedMatch) {
-                if (!inList || listType !== 'ul') {
-                    if (inList) {
-                        result.push(`</${listType}>`);
-                    }
-                    result.push('<ul>');
-                    inList = true;
-                    listType = 'ul';
-                }
-                result.push(`  <li>${unorderedMatch[2]}</li>`);
-            } else if (orderedMatch) {
-                if (!inList || listType !== 'ol') {
-                    if (inList) {
-                        result.push(`</${listType}>`);
-                    }
-                    result.push('<ol>');
-                    inList = true;
-                    listType = 'ol';
-                }
-                result.push(`  <li>${orderedMatch[3]}</li>`);
-            } else {
-                if (inList) {
-                    result.push(`</${listType}>`);
-                    inList = false;
-                    listType = null;
-                }
-
-                if (line.startsWith('> ')) {
-                    result.push(`<blockquote>${line.substring(2)}</blockquote>`);
-                } else if (line.trim() !== '') {
-                    result.push(line);
-                }
-            }
-        }
-
-        if (inList) {
-            result.push(`</${listType}>`);
-        }
-
-        html = result.join('\n');
-
-        const paragraphs = html.split(/\n{2,}/);
+        const paragraphs = html.split('\n\n');
         html = paragraphs.map(p => {
             p = p.trim();
             if (!p) return '';
@@ -228,16 +206,14 @@
                 p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr')) {
                 return p;
             }
-            return `<p>${p.replace(/\n/g, ' ')}</p>`;
-        }).join('\n\n');
+            return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+        }).join('\n');
 
         html = html.replace(/<p><\/p>/g, '');
         html = html.replace(/<p>(<h[1-3]>)/g, '$1');
         html = html.replace(/(<\/h[1-3]>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ul>)/g, '$1');
         html = html.replace(/(<\/ul>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<ol>)/g, '$1');
-        html = html.replace(/(<\/ol>)<\/p>/g, '$1');
         html = html.replace(/<p>(<pre>)/g, '$1');
         html = html.replace(/(<\/pre>)<\/p>/g, '$1');
         html = html.replace(/<p>(<blockquote>)/g, '$1');

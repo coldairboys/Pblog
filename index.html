@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,22 +10,21 @@
     <header class="header">
         <nav class="nav">
             <div class="nav-brand">
-                <a href="index.html">CodeLog</a>
+                <a href="index.html">&lt;CodeLog/&gt;</a>
             </div>
             <div class="nav-actions">
-                <button id="themeToggle" class="theme-toggle" aria-label="切换主题">
-                    <span class="theme-icon dark-icon">☾</span>
-                    <span class="theme-icon light-icon">☀</span>
+                <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+                    <span class="theme-icon dark-icon">☀</span>
+                    <span class="theme-icon light-icon">☾</span>
                 </button>
-                <button id="navToggle" class="nav-toggle" aria-label="切换导航菜单">
+                <button class="nav-toggle" id="navToggle" aria-label="菜单">
                     <span></span>
                     <span></span>
                     <span></span>
                 </button>
             </div>
-            <ul id="navMenu" class="nav-menu">
+            <ul class="nav-menu" id="navMenu">
                 <li><a href="index.html" class="active">首页</a></li>
-                <li><a href="#/about">关于</a></li>
             </ul>
         </nav>
     </header>
@@ -33,20 +32,23 @@
     <main class="main">
         <section class="hero">
             <h1>CodeLog</h1>
-            <p class="subtitle">记录技术成长，分享编程心得</p>
-            <p class="intro">一个简洁、优雅的程序员博客，专注于技术分享与思考记录。</p>
+            <p class="subtitle">记录代码，分享思考</p>
+            <p class="intro">
+                纯静态 Markdown 博客，默认深色模式。<br>
+                极简、干净、专注内容。
+            </p>
         </section>
 
-        <section>
-            <h2 class="section-title">最新文章</h2>
-            <div id="articleList" class="article-list">
+        <section class="articles">
+            <h2 class="section-title">文章列表</h2>
+            <div class="article-list" id="articleList">
                 <div class="loading">加载中...</div>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <p>&copy; 2026 CodeLog. All rights reserved.</p>
+        <p>CodeLog © 2026 | 纯静态 Markdown 博客</p>
     </footer>
 
     <script src="js/main.js"></script>
