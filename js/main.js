@@ -138,6 +138,15 @@
         return meta;
     }
 
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function parseMarkdown(md) {
         let html = md;
 
@@ -159,8 +168,17 @@
             html = lines.slice(contentStart).join('\n');
         }
 
+        const codeBlocks = [];
+        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+            const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+            codeBlocks.push({
+                placeholder: placeholder,
+                code: escapeHtml(code)
+            });
+            return `<pre><code>${placeholder}</code></pre>`;
+        });
+
         html = html
-            .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
             .replace(/`([^`]+)`/g, '<code>$1</code>')
             .replace(/^### (.+)$/gm, '<h3>$1</h3>')
             .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -175,6 +193,10 @@
             .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
             .replace(/^\s*\n/gm, '')
             .replace(/\n{3,}/g, '\n\n');
+
+        codeBlocks.forEach(item => {
+            html = html.replace(item.placeholder, item.code);
+        });
 
         const paragraphs = html.split('\n\n');
         html = paragraphs.map(p => {
