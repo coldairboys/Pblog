@@ -159,6 +159,7 @@
             html = lines.slice(contentStart).join('\n');
         }
 
+        html = html.replace(/````(\w*)\n([\s\S]*?)````/g, '<pre><code>$2</code></pre>');
         html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
         html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
         html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
