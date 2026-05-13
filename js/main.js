@@ -102,6 +102,9 @@
                     </article>
                 </div>
             `;
+
+            // 为代码块添加复制按钮功能
+            addCopyButtons();
         } catch (error) {
             main.innerHTML = `
                 <div class="post-page">
@@ -138,6 +141,69 @@
         return meta;
     }
 
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function addCopyButtons() {
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const pre = this.parentElement;
+                const code = pre.querySelector('code');
+                const text = code.textContent;
+
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = this.textContent;
+                    this.textContent = '已复制!';
+                    this.classList.add('copied');
+
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                });
+            });
+        });
+    }
+
+    function parseTable(tableText) {
+        const lines = tableText.trim().split('\n').filter(line => line.trim());
+        if (lines.length < 2) return tableText;
+
+        let html = '<table>';
+
+        // 表头
+        const headerRow = lines[0].split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+        html += '<thead><tr>';
+        headerRow.forEach(cell => {
+            html += `<th>${cell}</th>`;
+        });
+        html += '</tr></thead>';
+
+        // 数据行
+        html += '<tbody>';
+        for (let i = 2; i < lines.length; i++) {
+            const row = lines[i].split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+            html += '<tr>';
+            row.forEach(cell => {
+                html += `<td>${cell}</td>`;
+            });
+            html += '</tr>';
+        }
+        html += '</tbody>';
+
+        html += '</table>';
+        return html;
+    }
+
     function parseMarkdown(md) {
         let html = md;
 
@@ -145,7 +211,7 @@
         let contentStart = 0;
         const lines = html.split('\n');
 
-        for (let i = 0; i < Math.min(10, lines.length); i++) {
+        for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (line.startsWith('---') || line.startsWith('# ') || line.startsWith('**日期:') || line.startsWith('**发布日期:')) {
                 metaLines.push(i);
@@ -160,119 +226,74 @@
         }
 
         const codeBlocks = [];
-        let codeBlockIndex = 0;
-
-        html = html.replace(/````(\w*)\n([\s\S]*?)````/g, function(match, lang, content) {
-            codeBlocks.push({ lang: lang || 'text', content: content });
-            return `[[CODE_BLOCK_${codeBlockIndex++}]]`;
+        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+            const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+            codeBlocks.push({
+                placeholder: placeholder,
+                code: escapeHtml(code)
+            });
+            return `<pre><button class="copy-btn">复制</button><code>${placeholder}</code></pre>`;
         });
 
-        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, content) {
-            codeBlocks.push({ lang: lang || 'text', content: content });
-            return `[[CODE_BLOCK_${codeBlockIndex++}]]`;
+        // 先处理表格
+        const tableBlocks = [];
+        html = html.replace(/(\|.*\|\n\|[-:| ]*\|\n(?:\|.*\|\n?)*)/g, function(match) {
+            const placeholder = `__TABLE_BLOCK_${tableBlocks.length}__`;
+            tableBlocks.push({
+                placeholder: placeholder,
+                table: parseTable(match)
+            });
+            return placeholder;
         });
 
-        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-        html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
-        html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-        html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-        html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-        html = html.replace(/^---$/gm, '<hr>');
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+        html = html
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/^\> (.+)$/gm, '<blockquote>$1</blockquote>')
+            .replace(/^\- (.+)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)\n(<li>)/g, '$1$2')
+            .replace(/(<li>[\s\S]*?)(?=\n(?!<li>)|$)/g, '<ul>$1</ul>')
+            .replace(/<\/ul>\n<ul>/g, '')
+            .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+            .replace(/^---$/gm, '<hr>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+            .replace(/^\s*\n/gm, '')
+            .replace(/\n{3,}/g, '\n\n');
 
-        const htmlLines = html.split('\n');
-        const result = [];
-        let inList = false;
-        let listType = null;
+        // 替换回表格
+        tableBlocks.forEach(item => {
+            html = html.replace(item.placeholder, item.table);
+        });
 
-        for (let i = 0; i < htmlLines.length; i++) {
-            let line = htmlLines[i];
+        codeBlocks.forEach(item => {
+            html = html.replace(item.placeholder, item.code);
+        });
 
-            const unorderedMatch = line.match(/^(\s*)[-\*\+] (.+)$/);
-            const orderedMatch = line.match(/^(\s*)(\d+)\. (.+)$/);
-
-            if (unorderedMatch) {
-                if (!inList || listType !== 'ul') {
-                    if (inList) {
-                        result.push(`</${listType}>`);
-                    }
-                    result.push('<ul>');
-                    inList = true;
-                    listType = 'ul';
-                }
-                result.push(`  <li>${unorderedMatch[2]}</li>`);
-            } else if (orderedMatch) {
-                if (!inList || listType !== 'ol') {
-                    if (inList) {
-                        result.push(`</${listType}>`);
-                    }
-                    result.push('<ol>');
-                    inList = true;
-                    listType = 'ol';
-                }
-                result.push(`  <li>${orderedMatch[3]}</li>`);
-            } else {
-                if (inList) {
-                    result.push(`</${listType}>`);
-                    inList = false;
-                    listType = null;
-                }
-
-                if (line.startsWith('> ')) {
-                    result.push(`<blockquote><p>${line.substring(2)}</p></blockquote>`);
-                } else if (line.trim() !== '') {
-                    result.push(line);
-                }
-            }
-        }
-
-        if (inList) {
-            result.push(`</${listType}>`);
-        }
-
-        html = result.join('\n');
-
-        const paragraphs = html.split(/\n{2,}/);
+        const paragraphs = html.split('\n\n');
         html = paragraphs.map(p => {
             p = p.trim();
             if (!p) return '';
             if (p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<ol') ||
-                p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr') ||
-                p.startsWith('[[CODE_BLOCK_')) {
+                p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr')) {
                 return p;
             }
-            return `<p>${p.replace(/\n/g, ' ')}</p>`;
-        }).join('\n\n');
+            return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+        }).join('\n');
 
         html = html.replace(/<p><\/p>/g, '');
-        html = html.replace(/<p>(<h[1-6]>)/g, '$1');
-        html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<h[1-3]>)/g, '$1');
+        html = html.replace(/(<\/h[1-3]>)<\/p>/g, '$1');
         html = html.replace(/<p>(<ul>)/g, '$1');
         html = html.replace(/(<\/ul>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<ol>)/g, '$1');
-        html = html.replace(/(<\/ol>)<\/p>/g, '$1');
         html = html.replace(/<p>(<pre>)/g, '$1');
         html = html.replace(/(<\/pre>)<\/p>/g, '$1');
         html = html.replace(/<p>(<blockquote>)/g, '$1');
         html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
         html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
 
-        html = html.replace(/\[\[CODE_BLOCK_(\d+)\]\]/g, function(match, index) {
-            const block = codeBlocks[parseInt(index)];
-            if (block) {
-                const escapedContent = escapeHtml(block.content);
-                return `<pre class="language-${block.lang}"><code>${escapedContent}</code></pre>`;
-            }
-            return match;
-        });
-
         return html;
-    }
-
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     window.addEventListener('hashchange', handleRoute);
