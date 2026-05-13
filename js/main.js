@@ -105,6 +105,11 @@
 
             // 为代码块添加复制按钮功能
             addCopyButtons();
+
+            // 使用 Prism.js 进行语法高亮
+            if (window.Prism) {
+                Prism.highlightAll();
+            }
         } catch (error) {
             main.innerHTML = `
                 <div class="post-page">
@@ -228,11 +233,12 @@
         const codeBlocks = [];
         html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
             const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+            const languageClass = lang ? ` language-${lang}` : '';
             codeBlocks.push({
                 placeholder: placeholder,
                 code: escapeHtml(code)
             });
-            return `<pre><button class="copy-btn">复制</button><code>${placeholder}</code></pre>`;
+            return `<pre class="line-numbers"><button class="copy-btn">复制</button><code class="${languageClass}">${placeholder}</code></pre>`;
         });
 
         // 先处理表格
