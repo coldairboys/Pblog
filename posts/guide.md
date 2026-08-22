@@ -37,7 +37,7 @@ blog/
 
 ### 文件夹作用
 
-- `posts/` — 你的文章仓库，所有 `.md` 文件都会被自动识别
+- `posts/` — 你的文章仓库，所有 `.md` 文章在这里管理（在 `posts/posts.json` 中登记后显示）
 - `css/` — 控制全站样式，包括深色/浅色主题
 - `js/` — 核心脚本，负责解析 Markdown 和主题切换
 
@@ -91,13 +91,27 @@ posts/2026-05-13-my-first-post.md
 > 引用块
 
 [链接文字](https://example.com)
+
+| 表头一 | 表头二 |
+| --- | --- |
+| 单元格 | 单元格 |
+
+---
 ```
 
-### ④ 保存并预览
+### ④ 登记并预览
 
 1. 保存 `.md` 文件
-2. 在浏览器中刷新博客首页
-3. 新文章会自动出现在列表中
+2. 打开 `posts/posts.json`，按下述格式登记新文章信息
+3. 刷新博客首页，新文章会出现在列表中（按日期自动倒序排列）
+
+登记格式示例：
+
+```json
+[
+    { "title": "我的第一篇文章", "date": "2026-05-13", "summary": "一句话摘要", "file": "posts/2026-05-13-my-first-post.md" }
+]
+```
 
 ---
 
@@ -107,9 +121,9 @@ posts/2026-05-13-my-first-post.md
 
 博客默认启用深色模式，界面配色如下：
 
-- 背景：深灰色 `#1a1a1a`
-- 文字：浅灰色 `#e0e0e0`
-- 代码块：纯黑色背景 + 绿色文字 `#00ff00`
+- 背景：深灰色 `#1e1e1e`
+- 文字：浅灰色 `#c9d1d9`
+- 代码块：深色背景 `#282c34`，搭配 Prism.js 语法高亮
 
 ### 切换主题
 
@@ -128,17 +142,17 @@ posts/2026-05-13-my-first-post.md
 
 ```css
 [data-theme="dark"] {
-    --bg-primary: #1a1a1a;      /* 主背景 */
-    --bg-secondary: #242424;    /* 次级背景 */
-    --bg-code: #0d0d0d;         /* 代码块背景 */
-    --text-primary: #e0e0e0;     /* 主文字 */
-    --code-text: #00ff00;        /* 代码文字 */
+    --bg-primary: #1e1e1e;      /* 主背景 */
+    --bg-secondary: #2a2a2a;    /* 次级背景 */
+    --bg-code: #282c34;         /* 代码块背景 */
+    --text-primary: #c9d1d9;    /* 主文字 */
+    --code-text: #e6edf3;       /* 代码文字 */
 }
 
 [data-theme="light"] {
     --bg-primary: #ffffff;      /* 浅色主背景 */
-    --text-primary: #1a1a1a;    /* 浅色主文字 */
-    --code-text: #22863a;        /* 浅色代码文字 */
+    --text-primary: #1f2328;    /* 浅色主文字 */
+    --code-text: #24292f;       /* 浅色代码文字 */
 }
 ```
 
@@ -218,14 +232,16 @@ ifconfig | grep inet
 
 ### 添加更多文章
 
-在 `js/main.js` 中找到 `articles` 数组，添加新文章：
+在 `posts/posts.json` 中追加一条记录即可：
 
-```javascript
-const articles = [
-    { title: '第一篇', date: '2026-05-12', summary: '摘要', file: 'posts/guide.md' },
-    { title: '第二篇', date: '2026-05-13', summary: '摘要', file: 'posts/your-post.md' }
-];
+```json
+[
+    { "title": "第一篇", "date": "2026-05-12", "summary": "摘要", "file": "posts/guide.md" },
+    { "title": "第二篇", "date": "2026-05-13", "summary": "摘要", "file": "posts/your-post.md" }
+]
 ```
+
+列表会按 `date` 自动倒序排列。
 
 ### 自定义代码高亮
 
@@ -260,7 +276,7 @@ const articles = [
 
 ### Q: 为什么文章加载失败？
 
-A: 确保通过本地服务器访问（`http://localhost:xxxx`），而不是直接打开 HTML 文件。浏览器安全策略会阻止直接加载本地 Markdown 文件。
+A: 确保通过本地服务器访问（`http://localhost:xxxx`），而不是直接打开 HTML 文件。浏览器安全策略会阻止直接加载本地 Markdown 文件。同时确认 `posts/posts.json` 中登记的文件路径正确。
 
 ### Q: 如何修改深色模式的配色？
 
@@ -268,11 +284,8 @@ A: 编辑 `css/style.css` 中的 CSS 变量。
 
 ### Q: 支持哪些 Markdown 语法？
 
-A: 支持标题、段落、粗体、斜体、代码块、列表、引用、链接。暂不支持表格和图片（可使用 HTML）。
+A: 支持标题（h1-h6）、段落、粗体、斜体、行内代码、代码块、无序/有序列表、引用、链接、表格和分割线。暂不支持图片；正文中的 HTML 标签会被转义为纯文本显示。
 
 ---
 
-<div class="encouragement">
-🚀 好了，开始写你的第一篇文章吧！<br>
-有问题欢迎交流！
-</div>
+> 🚀 好了，开始写你的第一篇文章吧！有问题欢迎交流！

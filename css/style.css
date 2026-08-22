@@ -333,6 +333,21 @@ a:hover {
     color: var(--text-secondary);
 }
 
+.post-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.post-tag {
+    font-size: 0.8rem;
+    padding: 2px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-secondary);
+}
+
 .post-content {
     font-size: 1rem;
     line-height: 1.8;
@@ -356,6 +371,19 @@ a:hover {
     font-size: 1.15rem;
     font-weight: 600;
     margin: 28px 0 12px;
+}
+
+.post-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 24px 0 10px;
+}
+
+.post-content h5,
+.post-content h6 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 20px 0 8px;
 }
 
 .post-content p {
@@ -543,16 +571,6 @@ a:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 
-.encouragement {
-    text-align: center;
-    padding: 32px;
-    background: var(--gradient);
-    border-radius: 12px;
-    margin-top: 40px;
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-
 .footer {
     border-top: 1px solid var(--border);
     padding: 24px 20px;
@@ -634,11 +652,5 @@ a:hover {
         margin: 20px -16px;
         border-radius: 0;
         padding: 16px 20px;
-    }
-
-    .encouragement {
-        margin: 32px -16px;
-        border-radius: 0;
-        padding: 24px 20px;
     }
 }

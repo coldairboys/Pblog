@@ -1,19 +1,26 @@
 (function() {
-    const THEME_KEY = 'codelog-theme';
-    const articles = [
-        { title: '如何发布你的第一篇 Markdown 博客', date: '2026-05-12', summary: '手把手教你用这个静态博客，发布、编辑、预览 Markdown 文章', file: 'posts/guide.md' }
-    ];
+    const THEME_KEY = 'pblog-theme';
+    const LEGACY_THEME_KEY = 'codelog-theme'; // 旧版残留 key，用于迁移用户偏好
+    const POSTS_INDEX = 'posts/posts.json';
+    const BASE_TITLE = document.title;
+
+    let homeMarkup = ''; // 首页结构快照，用于从文章页返回时还原视图
 
     function init() {
+        const main = document.querySelector('.main');
+        if (main) homeMarkup = main.innerHTML;
+
         initTheme();
         handleRoute();
         initNavigation();
+        console.log('咩~ Pblog 已就绪，愿代码与你同在。');
     }
 
     function initTheme() {
-        const savedTheme = localStorage.getItem(THEME_KEY);
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = savedTheme || (prefersDark ? 'dark' : 'dark');
+        const savedTheme = localStorage.getItem(THEME_KEY) || localStorage.getItem(LEGACY_THEME_KEY);
+        const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        // 未手动选择过主题时：系统偏好浅色则用浅色，否则默认深色
+        const theme = savedTheme || (prefersLight ? 'light' : 'dark');
         document.documentElement.setAttribute('data-theme', theme);
 
         document.getElementById('themeToggle').addEventListener('click', toggleTheme);
@@ -55,20 +62,43 @@
         }
     }
 
-    function renderHome() {
+    async function renderHome() {
+        const main = document.querySelector('.main');
+        if (!main) return;
+
+        // 从文章页返回时，先还原首页结构
+        if (!document.getElementById('articleList') && homeMarkup) {
+            main.innerHTML = homeMarkup;
+        }
+
         const list = document.getElementById('articleList');
         if (!list) return;
 
-        if (articles.length === 0) {
-            list.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">暂无文章</p>';
+        document.title = BASE_TITLE;
+
+        let articles;
+        try {
+            const response = await fetch(POSTS_INDEX);
+            if (!response.ok) throw new Error('文章索引加载失败');
+            articles = await response.json();
+        } catch (error) {
+            list.innerHTML = `<div class="loading">${escapeHtml(error.message)}。请确认 posts/posts.json 存在，并通过本地服务器访问（http://localhost:xxxx）</div>`;
             return;
         }
 
+        if (!Array.isArray(articles) || articles.length === 0) {
+            list.innerHTML = '<div class="loading">暂无文章</div>';
+            return;
+        }
+
+        // 按发布日期倒序排列
+        articles.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+
         list.innerHTML = articles.map(article => `
             <a href="#/post/${encodeURIComponent(article.file)}" class="article-card">
-                <span class="article-date">${article.date}</span>
-                <h3 class="article-title">${article.title}</h3>
-                <p class="article-summary">${article.summary}</p>
+                <span class="article-date">${escapeHtml(article.date || '')}</span>
+                <h3 class="article-title">${escapeHtml(article.title || '')}</h3>
+                <p class="article-summary">${escapeHtml(article.summary || '')}</p>
                 <span class="read-more">阅读全文 →</span>
             </a>
         `).join('');
@@ -84,18 +114,19 @@
 
             const markdown = await response.text();
             const html = parseMarkdown(markdown);
-
             const meta = extractMeta(markdown);
-            const pageTitle = meta.title ? `${meta.title} - CodeLog` : 'CodeLog';
 
-            document.title = pageTitle;
+            document.title = meta.title ? `${meta.title} - 咩` : BASE_TITLE;
 
             main.innerHTML = `
                 <div class="post-page">
                     <a href="index.html" class="back-link">← 返回首页</a>
                     <header class="post-header">
-                        <h1 class="post-title">${meta.title}</h1>
-                        <p class="post-date">${meta.date}</p>
+                        <h1 class="post-title">${escapeHtml(meta.title || '无标题')}</h1>
+                        <div class="post-meta">
+                            <span class="post-date">${escapeHtml(meta.date)}</span>
+                            ${meta.category ? `<span class="post-tag">${escapeHtml(meta.category)}</span>` : ''}
+                        </div>
                     </header>
                     <article class="post-content">
                         ${html}
@@ -111,46 +142,78 @@
                 Prism.highlightAll();
             }
         } catch (error) {
+            document.title = BASE_TITLE;
             main.innerHTML = `
                 <div class="post-page">
                     <a href="index.html" class="back-link">← 返回首页</a>
                     <h1>文章加载失败</h1>
-                    <p style="color: var(--text-secondary); margin-top: 16px;">${error.message}</p>
-                    <p style="color: var(--text-secondary); margin-top: 8px;">请确保通过本地服务器访问（http://localhost:xxxx）</p>
+                    <p style="color: var(--text-secondary); margin-top: 16px;">${escapeHtml(error.message)}</p>
+                    <p style="color: var(--text-secondary); margin-top: 8px;">请确保通过本地服务器访问（http://localhost:xxxx），且 posts/posts.json 中登记的路径正确</p>
                 </div>
             `;
         }
     }
 
+    // 剥离文章开头的元信息块（标题 / 日期 / 分类 / 摘要 / 分割线 / 空行）
+    function stripMeta(markdown) {
+        const lines = markdown.split('\n');
+        let i = 0;
+
+        while (i < lines.length) {
+            const line = lines[i].trim();
+            if (line === '' || line === '---' ||
+                line.startsWith('# ') ||
+                line.startsWith('**日期:**') || line.startsWith('**发布日期:**') ||
+                line.startsWith('**分类:**') ||
+                line.startsWith('> ')) {
+                i++;
+            } else {
+                break;
+            }
+        }
+
+        return lines.slice(i).join('\n');
+    }
+
     function extractMeta(markdown) {
         const lines = markdown.split('\n');
-        const meta = { title: '', date: '', summary: '' };
+        const meta = { title: '', date: '', summary: '', category: '' };
 
         for (let i = 0; i < Math.min(10, lines.length); i++) {
             const line = lines[i].trim();
-            if (line.startsWith('# ')) {
+            if (!meta.title && line.startsWith('# ')) {
                 meta.title = line.substring(2).trim();
             } else if (line.startsWith('**日期:**') || line.startsWith('**发布日期:**')) {
                 const match = line.match(/\d{4}-\d{2}-\d{2}/);
                 if (match) meta.date = match[0];
+            } else if (line.startsWith('**分类:**')) {
+                meta.category = line.replace('**分类:**', '').trim();
             } else if (line.startsWith('> ') && !meta.summary) {
                 meta.summary = line.substring(2).trim();
             }
         }
 
         if (!meta.date) {
-            const today = new Date();
-            meta.date = today.toISOString().split('T')[0];
+            meta.date = new Date().toISOString().split('T')[0];
         }
 
         return meta;
     }
 
     function escapeHtml(text) {
-        return text
+        return String(text)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // 正文转义：保留 > 以支持引用语法
+    function escapeText(text) {
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
     }
@@ -210,94 +273,95 @@
     }
 
     function parseMarkdown(md) {
-        let html = md;
+        let html = stripMeta(md);
 
-        const metaLines = [];
-        let contentStart = 0;
-        const lines = html.split('\n');
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (line.startsWith('---') || line.startsWith('# ') || line.startsWith('**日期:') || line.startsWith('**发布日期:')) {
-                metaLines.push(i);
-                if (i > 0 && lines[i-1].trim() === '') contentStart = i + 1;
-            } else if (contentStart > 0 && line !== '') {
-                break;
-            }
-        }
-
-        if (contentStart > 0) {
-            html = lines.slice(contentStart).join('\n');
-        }
-
+        // 1. 提取围栏代码块（保留原文，还原时统一转义）
         const codeBlocks = [];
         html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
             const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
-            const languageClass = lang ? ` language-${lang}` : '';
-            codeBlocks.push({
-                placeholder: placeholder,
-                code: escapeHtml(code)
-            });
-            return `<pre class="line-numbers"><button class="copy-btn">复制</button><code class="${languageClass}">${placeholder}</code></pre>`;
-        });
-
-        // 先处理表格
-        const tableBlocks = [];
-        html = html.replace(/(\|.*\|\n\|[-:| ]*\|\n(?:\|.*\|\n?)*)/g, function(match) {
-            const placeholder = `__TABLE_BLOCK_${tableBlocks.length}__`;
-            tableBlocks.push({
-                placeholder: placeholder,
-                table: parseTable(match)
-            });
+            codeBlocks.push({ placeholder, lang, code });
             return placeholder;
         });
 
+        // 2. 转义正文中的 HTML，防止注入（保留 > 以支持引用语法）
+        html = escapeText(html);
+
+        // 3. 提取表格（单元格内容已随正文转义）
+        const tableBlocks = [];
+        html = html.replace(/(\|.*\|\n\|[-:| ]*\|\n(?:\|.*\|\n?)*)/g, function(match) {
+            const placeholder = `__TABLE_BLOCK_${tableBlocks.length}__`;
+            tableBlocks.push({ placeholder, table: parseTable(match) });
+            return placeholder;
+        });
+
+        // 4. 提取行内代码（避免其内容被其他语法误处理）
+        const inlineCodes = [];
+        html = html.replace(/`([^`]+)`/g, function(match, code) {
+            const placeholder = `__INLINE_CODE_${inlineCodes.length}__`;
+            inlineCodes.push({ placeholder, html: `<code>${code}</code>` });
+            return placeholder;
+        });
+
+        // 5. 行级语法转换
         html = html
-            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/^###### (.+)$/gm, '<h6>$1</h6>')
+            .replace(/^##### (.+)$/gm, '<h5>$1</h5>')
+            .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
             .replace(/^### (.+)$/gm, '<h3>$1</h3>')
             .replace(/^## (.+)$/gm, '<h2>$1</h2>')
             .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
             .replace(/^\> (.+)$/gm, '<blockquote>$1</blockquote>')
-            .replace(/^\- (.+)$/gm, '<li>$1</li>')
-            .replace(/(<li>.*<\/li>)\n(<li>)/g, '$1$2')
+            // 无序 / 有序列表
+            .replace(/^- (.+)$/gm, '<li>$1</li>')
+            .replace(/^(\d+)\. (.+)$/gm, '<oli>$2</oli>')
+            .replace(/(<li>.*<\/li>)\n(?=<li>)/g, '$1')
+            .replace(/(<oli>.*<\/oli>)\n(?=<oli>)/g, '$1')
             .replace(/(<li>[\s\S]*?)(?=\n(?!<li>)|$)/g, '<ul>$1</ul>')
+            .replace(/(<oli>[\s\S]*?)(?=\n(?!<oli>)|$)/g, '<ol>$1</ol>')
             .replace(/<\/ul>\n<ul>/g, '')
-            .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+            .replace(/<\/ol>\n<ol>/g, '')
+            .replace(/<oli>/g, '<li>')
+            .replace(/<\/oli>/g, '</li>')
             .replace(/^---$/gm, '<hr>')
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-            .replace(/^\s*\n/gm, '')
+            // 链接：拦截 javascript: / data: 等危险协议
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(match, text, url) {
+                const href = url.trim();
+                const blocked = /^(javascript|data|vbscript):/i.test(href);
+                return `<a href="${blocked ? '#' : href}">${text}</a>`;
+            })
             .replace(/\n{3,}/g, '\n\n');
 
-        // 替换回表格
+        // 6. 还原表格 / 行内代码 / 代码块（用函数形式避免 $ 序列干扰）
         tableBlocks.forEach(item => {
-            html = html.replace(item.placeholder, item.table);
+            html = html.replace(item.placeholder, () => item.table);
         });
-
+        inlineCodes.forEach(item => {
+            html = html.replace(item.placeholder, () => item.html);
+        });
         codeBlocks.forEach(item => {
-            html = html.replace(item.placeholder, item.code);
+            const cls = item.lang ? ` class="language-${item.lang}"` : '';
+            const markup = `<pre class="line-numbers"><button class="copy-btn">复制</button><code${cls}>${escapeHtml(item.code)}</code></pre>`;
+            html = html.replace(item.placeholder, () => markup);
         });
 
+        // 7. 段落包裹（块级元素跳过）
         const paragraphs = html.split('\n\n');
         html = paragraphs.map(p => {
             p = p.trim();
             if (!p) return '';
-            if (p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<ol') ||
-                p.startsWith('<pre') || p.startsWith('<blockquote') || p.startsWith('<hr')) {
+            if (/^<(h[1-6]|ul|ol|pre|blockquote|hr|table)/.test(p)) {
                 return p;
             }
             return `<p>${p.replace(/\n/g, '<br>')}</p>`;
         }).join('\n');
 
-        html = html.replace(/<p><\/p>/g, '');
-        html = html.replace(/<p>(<h[1-3]>)/g, '$1');
-        html = html.replace(/(<\/h[1-3]>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<ul>)/g, '$1');
-        html = html.replace(/(<\/ul>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<pre>)/g, '$1');
-        html = html.replace(/(<\/pre>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<blockquote>)/g, '$1');
-        html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
-        html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
+        // 8. 清理误包裹在 <p> 内的块级元素
+        html = html
+            .replace(/<p><\/p>/g, '')
+            .replace(/<p>(<\/?(?:h[1-6]|ul|ol|pre|blockquote|hr|table)[^>]*>)/g, '$1')
+            .replace(/(<\/(?:h[1-6]|ul|ol|pre|blockquote|hr|table)[^>]*>)<\/p>/g, '$1');
 
         return html;
     }
